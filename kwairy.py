@@ -20,12 +20,15 @@ from llama_index.query_engine import RetrieverQueryEngine
 from llama_index.indices.postprocessor import SimilarityPostprocessor
 from langchain import OpenAI
 
+# Global settings
+from settings import runtime_logistics
+
 ## OPEN AI API KEY
 openai_key = os.getenv('OPENAI_API_KEY')
 openai.api_key = openai_key
 
-## MODE SELECTION AS PER ENV FILE
-MODE = "high"
+## MODE SELECTION AS PER SETTINGS.PY FILE
+USE_PERFORMANCE_PIPELINE = runtime_logistics["performance_mode"]
 
 ## Service context shared globally by the whole application
 service_context = ServiceContext.from_defaults(embed_model="local")
