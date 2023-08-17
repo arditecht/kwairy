@@ -5,7 +5,7 @@
 - Get the list of SQL Queries that underlie those requests.
 - No SQL knowledge needed, explore the depths of organizational data through an easy conversational interface.
 - Get on-demand data-driven reports for an insider's view of complex business problems.
-- Track and Share historical conversations with coworkers.
+- Share historical conversations with coworkers.
 
 ### DEV SETUP INSTRUCTIONS :computer:
 1. Make sure you have "docker-desktop" installed, and VSCode with "Dev-Containers" installed. 
