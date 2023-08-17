@@ -33,3 +33,5 @@ chroma_client = chromadb.Client()
 service_context = ServiceContext.from_defaults(embed_model="local")
 set_global_service_context(service_context)
 
+class Kwairy () :
+    pass

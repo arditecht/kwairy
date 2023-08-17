@@ -1,7 +1,7 @@
-### SETTINGS TO DETERMINE GLOBAL RUNTIME BEHAVIOUR
-
+### ---------------------------------------------- ############################
+# | SETTINGS TO DETERMINE GLOBAL RUNTIME BEHAVIOUR |			      #
 ###############################################################################
 
-high_performance = {
-    "run_mode" : "performance", # or "costs"
+runtime_logistics = {
+    "performance_mode" : True, # or false for cost savings mode
 }
