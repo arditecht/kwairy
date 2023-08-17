@@ -1,7 +1,17 @@
-## DEV SETUP INSTRUCTIONS:
-1. Make sure you have VSCode with Dev-Containers available.
-2. Go to the lower-left corner button and go to "New Dev Container" in the prompted list.
-3. Scroll a bit down and select a "simple Debian" image and create the container.
+# Kwairy :crystal_ball:
+
+**Vision**
+- Chat with Kwairy and get perfect concoctions of data, summaries and insights that precisely answer your request.
+- Get the list of SQL Queries that underlie those requests.
+- No SQL knowledge needed, explore the depths of organizational data through an easy conversational interface.
+- Get on-demand data-driven reports for an insider's view of complex business problems.
+- Track and Share historical conversations with coworkers.
+
+### DEV SETUP INSTRUCTIONS :computer:
+1. Make sure you have "docker-desktop" installed, and VSCode with "Dev-Containers" installed. 
+	- This docker-desktop is for windows, but get appropriate Docker UI/Client/Daemon for your OS.
+2. In VS Code, go to the lower-left corner button and go to "New Dev Container" in the prompted list.
+3. Scroll a bit down and select a "Simple Debian?" image and create the container.
 4. Once devcontainer workspace opens up in VSCode, Open its terminal ( ctrl + ` ) and run the following:
 	- `sudo apt update`
 	- `sudo apt -y upgrade`
@@ -11,7 +21,7 @@
 7. There are few more subtle dependencies that run the dev setup better overall.
 	- To install the extra deps., run `sudo apt install build-essential libssl-dev libffi-dev python3-dev`
 8. Git comes preinstalled in Debian, so just run git clone [url of this repo] in a folder you want as the project root.
-9. Make sure you're in the created project root folder at this point.
+9. Make sure you're in that created project root folder after this point.
 6. To install the full set of python libraries needed for this application, run `pip install -r requirements.txt`
-7. Before running this app on your browser, you need to add a `.env` file to this project/repository root folder. Open the `.env` file,
-	- add `OPENAI_API_KEY = <your-openai-key>`
+7. Before running this app on browser, you need to create a `.env` file in this project/repository folder. In the `.env` file, add
+	- `OPENAI_API_KEY = <your-openai-key>`

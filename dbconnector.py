@@ -9,4 +9,4 @@ connection_uri = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{
 # Using local sqlite server for dev
 
 class DBcomm :
-    
+    uri = "connection_uri"
