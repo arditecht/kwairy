@@ -1,0 +1,17 @@
+## DEV SETUP INSTRUCTIONS:
+1. Make sure you have VSCode with Dev-Containers available.
+2. Go to the lower-left corner button and go to "New Dev Container" in the prompted list.
+3. Scroll a bit down and select a "simple Debian" image and create the container.
+4. Once devcontainer workspace opens up in VSCode, Open its terminal ( ctrl + ` ) and run the following:
+	- `sudo apt update`
+	- `sudo apt -y upgrade`
+	- `python3 --version` check the Python Version [17-08-2023: The default 3.9.x that you get with this should work fine for now.]
+5. Download pip3 by `sudo apt install -y python3-pip`.
+6. Do `pip3 install numpy` to check if it is working.
+7. There are few more subtle dependencies that run the dev setup better overall.
+	- To install the extra deps., run `sudo apt install build-essential libssl-dev libffi-dev python3-dev`
+8. Git comes preinstalled in Debian, so just run git clone [url of this repo] in a folder you want as the project root.
+9. Make sure you're in the created project root folder at this point.
+6. To install the full set of python libraries needed for this application, run `pip install -r requirements.txt`
+7. Before running this app on your browser, you need to add a `.env` file to this project/repository root folder. Open the `.env` file,
+	- add `OPENAI_API_KEY = <your-openai-key>`
