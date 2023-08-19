@@ -1,9 +1,8 @@
 import os
 import openai
 
-
+from typing import Union
 import collections
-from collections.abc import Union
 from IPython.display import Markdown, display
 
 # access/create the .env file in the project dir for getting API keys. Create a .env file in the project/repository root,
@@ -37,7 +36,7 @@ from llama_index.retrievers import VectorIndexRetriever
 
 # DB Interface library
 from sqlalchemy import (Column, Integer, MetaData, String, Table, column,
-                        create_engine, select)
+                        create_engine, select, inspect)
 
 # import DB settings
 from dbconnector import DBcomm
@@ -115,12 +114,16 @@ set_global_service_context(service_context) # only for dev phase, later remove t
 sql_database = DBcomm.databases["sql"]
 
 
-
 class Kwairy () :
 	def __init__(self) :
 		self.task_stack = collections.deque()
+		inspector = inspect(DBcomm.sql_engine)
+		self.sql_table_names = inspector.get_table_names()
 
 	def chat_to_sql( self, question: Union(str, list[str]) , tables: Union(list[str], None) = None, synthesize_response: bool = True ) :
+		if not tables:
+			tables = self.sql_table_names
+		
 		query_engine = NLSQLTableQueryEngine(
 			sql_database=sql_database,
 			tables=tables,
@@ -134,8 +137,20 @@ class Kwairy () :
 		except Exception as ex:
 			response_md = "Error"
 			sql = f"ERROR: {str(ex)}"
-		response_template = """## Question: {question}   ##Answer: {response}   ## Generated SQL Query: {sql}"""
+		response_template = """## Question: {question} ```  ## Answer: {response} ```  ## Generated SQL Query:``` {sql}"""
 		display(Markdown(response_template.format(question=question, response=response_md, sql=sql)))
+		return response
 	
 	def ingest(user_input : str) :
+		# given this user query, we need to find the intent and entities
+		# and then we need to find the relevant tables and columns
+		# and then we need to generate the SQL query
+		# and then we need to execute the SQL query
+		# and then we need to return the results
+		# and then we need to display the results
+		# and then we need to ask the user if they want to continue
+		# and then we need to ask the user if they want to ask another question
+		# and then we need to ask the user if they want to exit
+		# and then we need to exit
+
 		pass

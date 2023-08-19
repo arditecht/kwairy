@@ -26,8 +26,8 @@ from sqlalchemy import select, create_engine, MetaData, Table, inspect, String, 
 class DBcomm :
     # working on a sample database for now
     connection_uri = "sqlite:///dev/chinook.db" # "your DB connection uri like in the example above" --For now using sqlite for dev and testing purposes
-    engine = create_engine(connection_uri)
-    sql_database = SQLDatabase(engine)
+    sql_engine = create_engine(connection_uri)
+    sql_database = SQLDatabase(sql_engine)
     databases = {
         "sql": sql_database,
         "keyvalue": None,
