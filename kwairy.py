@@ -62,9 +62,9 @@ class LLMConf () :
 	def __init__(self) :
 		if USE_PRECISION_PIPELINE : # This is by-default TRUE while development phase
 			# gpt 3.5 and gpt 4 route
-			self.llm_fast = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-3.5-turbo-16k"))
-			self.llm_deep = LLMPredictor(llm=OpenAI(temperature=0.1, model_name="gpt-4"))
-			self.llm_super = LLMPredictor(llm=OpenAI(temperature=0.2, model_name="gpt-4-32k"))
+			self.llm_fast = LLMPredictor(llm=ChatOpenAI(temperature=0.1, model_name="gpt-3.5-turbo-16k"))
+			self.llm_deep = LLMPredictor(llm=ChatOpenAI(temperature=0.1, model_name="gpt-4"))
+			self.llm_super = LLMPredictor(llm=ChatOpenAI(temperature=0.2, model_name="gpt-4-32k"))
 		else :
 			# llama 2 route: install LlamaCPP to enable GPU efficient LLama-2 13B chat model to work acc to the production environment chosen.
 			# download guide: https://github.com/abetlen/llama-cpp-python#installation-with-openblas--cublas--clblast--metal
@@ -105,13 +105,10 @@ supe_llm = llm_conf.llm_super
 llama_debug = LlamaDebugHandler(print_trace_on_end=True)
 callback_manager = CallbackManager([llama_debug])
 service_context = ServiceContext.from_defaults (llm=deep_llm if USE_PRECISION_PIPELINE else fast_llm,
-					       						embed_model="local" if USE_LOCAL_EMBED_MODEL else None, # None for openai embeddings i.e. default for llamaindex
+					       						#embed_model="local" if USE_LOCAL_EMBED_MODEL else None, # None for openai embeddings i.e. default for llamaindex
 												llama_logger=llama_logger,
 												callback_manager=callback_manager)
 set_global_service_context(service_context) # only for dev phase, later remove this line and use locally instantiated service_context directly based on the usecase
-
-# Get the Database connector object
-sql_database = DBcomm.databases["sql"]
 
 
 class Kwairy () :
@@ -119,14 +116,12 @@ class Kwairy () :
 		self.task_stack = collections.deque()
 		inspector = inspect(DBcomm.sql_engine)
 		self.sql_table_names = inspector.get_table_names()
+		self.sql_db = SQLDatabase(DBcomm.sql_engine, include_tables=self.sql_table_names)
 
-	def chat_to_sql( self, question: Union(str, list[str]) , tables: Union(list[str], None) = None, synthesize_response: bool = True ) :
-		if not tables:
-			tables = self.sql_table_names
-		
+	def chat_to_sql( self, question: Union[str, list[str]] , synthesize_response: bool = True ) :
 		query_engine = NLSQLTableQueryEngine(
-			sql_database=sql_database,
-			tables=tables,
+			sql_database=self.sql_db,
+			tables=self.sql_table_names,
 			synthesize_response=synthesize_response,
 			service_context=service_context,
 		)
@@ -135,11 +130,12 @@ class Kwairy () :
 			response_md = str(response)
 			sql = response.metadata["sql_query"]
 		except Exception as ex:
+			response = "Error"
 			response_md = "Error"
 			sql = f"ERROR: {str(ex)}"
-		response_template = """## Question: {question} ```  ## Answer: {response} ```  ## Generated SQL Query:``` {sql}"""
-		display(Markdown(response_template.format(question=question, response=response_md, sql=sql)))
-		return response
+		# response_template = """## Question: {question} ```  ## Answer: {response} ```  ## Generated SQL Query:``` {sql}"""
+		# display(Markdown(response_template.format(question=question, response=response_md, sql=sql)))
+		return response, response_md, sql
 	
 	def ingest(user_input : str) :
 		# given this user query, we need to find the intent and entities
