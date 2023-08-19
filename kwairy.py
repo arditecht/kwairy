@@ -1,6 +1,11 @@
 import os
 import openai
 
+
+import collections
+from collections.abc import Union
+from IPython.display import Markdown, display
+
 # access/create the .env file in the project dir for getting API keys. Create a .env file in the project/repository root,
 # and add your own API key like "OPENAI_API_KEY = <your key>" without any quotes, after you pull this code in your IDE (VS Code devcontainer recommended).
 # .env has already been added to git ignore so don't worry when pushing all files to remote.
@@ -8,12 +13,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
-# import the required llama-index and langchain
+# import the required langchain and llama-index libraries.
 # also the libraries for this querying pipeline.
-from collections.abc import Union
-from IPython.display import Markdown, display
 from langchain import OpenAI
+from langchain.agents import Tool
+from langchain.chains.conversation.memory import ConversationBufferMemory
+from langchain.chat_models import ChatOpenAI
+from langchain.agents import initialize_agent
+
+from llama_index.langchain_helpers.agents import LlamaToolkit, create_llama_chat_agent, IndexToolConfig
 from llama_index import (LLMPredictor, ServiceContext, SimpleDirectoryReader,
                          SQLDatabase, StorageContext, VectorStoreIndex,
                          set_global_service_context)
@@ -26,11 +34,18 @@ from llama_index.objects import (ObjectIndex, SQLTableNodeMapping,
                                  SQLTableSchema)
 from llama_index.query_engine import RetrieverQueryEngine
 from llama_index.retrievers import VectorIndexRetriever
+
+# DB Interface library
 from sqlalchemy import (Column, Integer, MetaData, String, Table, column,
                         create_engine, select)
 
 # import DB settings
 from dbconnector import DBcomm
+
+# Import Global runtime settings
+from settings import runtime
+##################################################################################################################################################################
+
 
 # Logger object for logging the pipeline
 llama_logger = LlamaLogger()
@@ -38,9 +53,6 @@ llama_logger = LlamaLogger()
 ## OPEN AI API KEY
 openai_key = os.getenv('OPENAI_API_KEY')
 openai.api_key = openai_key
-
-# Import Global runtime settings
-from settings import runtime
 
 ## MODE SELECTION AS PER SETTINGS.PY FILE
 USE_PRECISION_PIPELINE = runtime["precision_mode"]
@@ -106,7 +118,8 @@ sql_database = DBcomm.databases["sql"]
 
 class Kwairy () :
 	def __init__(self) :
-		pass
+		self.task_stack = collections.deque()
+
 	def chat_to_sql( self, question: Union(str, list[str]) , tables: Union(list[str], None) = None, synthesize_response: bool = True ) :
 		query_engine = NLSQLTableQueryEngine(
 			sql_database=sql_database,
@@ -123,3 +136,6 @@ class Kwairy () :
 			sql = f"ERROR: {str(ex)}"
 		response_template = """## Question: {question}   ##Answer: {response}   ## Generated SQL Query: {sql}"""
 		display(Markdown(response_template.format(question=question, response=response_md, sql=sql)))
+	
+	def ingest(user_input : str) :
+		pass
