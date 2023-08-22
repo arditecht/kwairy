@@ -9,7 +9,6 @@ from IPython.display import Markdown, display
 # and add your own API key like "OPENAI_API_KEY = <your key>" without any quotes, after you pull this code in your IDE (VS Code devcontainer recommended).
 # .env has already been added to git ignore so don't worry when pushing all files to remote.
 from dotenv import load_dotenv
-
 load_dotenv()
 
 # import the required langchain and llama-index libraries.
@@ -96,47 +95,59 @@ class LLMConf () :
 
 ## INSTANTIATE LLMs
 llm_conf = LLMConf()
-fast_llm = llm_conf.llm_fast
-deep_llm = llm_conf.llm_deep
-supe_llm = llm_conf.llm_super
 
 ## LLAMA-INDEX CONFIGURATION
 ## Service context shared globally by the whole application
-llama_debug = LlamaDebugHandler(print_trace_on_end=True)
-callback_manager = CallbackManager([llama_debug])
-service_context = ServiceContext.from_defaults (llm=deep_llm if USE_PRECISION_PIPELINE else fast_llm,
+service_context = ServiceContext.from_defaults (llm=llm_conf.llm_deep if USE_PRECISION_PIPELINE else llm_conf.llm_fast,
 					       						#embed_model="local" if USE_LOCAL_EMBED_MODEL else None, # None for openai embeddings i.e. default for llamaindex
-												llama_logger=llama_logger,
-												callback_manager=callback_manager)
+												llama_logger=llama_logger)
 set_global_service_context(service_context) # only for dev phase, later remove this line and use locally instantiated service_context directly based on the usecase
 
 
 class Kwairy () :
 	def __init__(self) :
 		self.task_stack = collections.deque()
+		self.reflect_stack = collections.deque()
+		self.create_tableschema_index()
+	
+	def set_task (self, task : Union[str, object]) :
+		self.task_stack.append(task)
+	
+	def get_task (self) :
+		return self.task_stack.popleft()
+	
+	def set_note(self, reflection : str) :
+		self.reflect_stack.append(reflection)
+
+	def create_tableschema_index (self) :
 		inspector = inspect(DBcomm.sql_engine)
 		self.sql_table_names = inspector.get_table_names()
-		self.sql_db = SQLDatabase(DBcomm.sql_engine, include_tables=self.sql_table_names)
-
-	def chat_to_sql( self, question: Union[str, list[str]] , synthesize_response: bool = True ) :
-		query_engine = NLSQLTableQueryEngine(
-			sql_database=self.sql_db,
-			tables=self.sql_table_names,
-			synthesize_response=synthesize_response,
-			service_context=service_context,
+		self.indices_created = False
+		self.sqldb, self.schemaindex = None, None
+		#### SQL DB index
+		# load all table definitions as indexes for retrieval later
+		print("Loading table schema as object index")
+		metadata_obj = MetaData()
+		metadata_obj.reflect(DBcomm.sql_engine)
+		sql_database = SQLDatabase(DBcomm.sql_engine)
+		table_node_mapping = SQLTableNodeMapping(sql_database)
+		table_schema_objs = []
+		for table_name in metadata_obj.tables.keys():
+			table_schema_objs.append(SQLTableSchema(table_name=table_name))
+		# Dump the table schema information into a vector index. The vector index is stored within the context builder for future use.
+		tableschema_index = ObjectIndex.from_objects(
+			table_schema_objs,
+			table_node_mapping,
+			VectorStoreIndex,
 		)
-		try:
-			response = query_engine.query(question)
-			response_md = str(response)
-			sql = response.metadata["sql_query"]
-		except Exception as ex:
-			response = "Error"
-			response_md = "Error"
-			sql = f"ERROR: {str(ex)}"
-		# response_template = """## Question: {question} ```  ## Answer: {response} ```  ## Generated SQL Query:``` {sql}"""
-		# display(Markdown(response_template.format(question=question, response=response_md, sql=sql)))
-		return response, response_md, sql
+		self.sqldb, self.schemaindex = sql_database, tableschema_index
 	
+	def sql_pipeline( self, question: Union[str, list[str]] , synthesize_response: bool = True ) :
+		db, ts_index = self.create_tableschema_index()
+		query_engine = SQLTableRetrieverQueryEngine(db, ts_index.as_retriever(similarity_top_k=1), service_context=service_context)
+		pass
+
+
 	def ingest(user_input : str) :
 		# given this user query, we need to find the intent and entities
 		# and then we need to find the relevant tables and columns
@@ -149,4 +160,7 @@ class Kwairy () :
 		# and then we need to ask the user if they want to exit
 		# and then we need to exit
 
+		pass
+
+	def reply(pipeline_output : str) :
 		pass

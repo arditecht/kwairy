@@ -22,7 +22,13 @@
 8. Git comes with Debian, so just run `git clone <url of this repo>` in a folder you want as the project root.
 9. Now go to that created project root folder, install the full set of python libraries needed for this application in the container:
 	- run `pip3 install -r requirements.txt`
-10. Before running this app on browser, create a blank `.env` file in this project/repository folder. In `.env` file, add the following
+10. Create a blank `.env` file in this project/repository folder. In `.env` file, add the following
 	- `OPENAI_API_KEY = <your-openai-key>`
+11. To run the software in a CLI, type `python3 main.py` in the project root dir in the terminal.
 
 For more details on VS Code dev-containers: https://code.visualstudio.com/docs/devcontainers/containers 
+
+#### To use GPT models from Azure instead of Open AI API, add the following environment variables in .env file
+OPENAI_API_TYPE = azure 
+OPENAI_API_VERSION = '2022-12-01'
+OPENAI_API_BASE = https://your-resource-name.openai.azure.com

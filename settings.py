@@ -13,5 +13,4 @@ runtime = {
 
 dev = {
     "debug_mode" : True, # use this to enable debug mode
-    
 }
